@@ -50,12 +50,16 @@
 ```bash
    git clone https://github.com/DmitryWebsmith/reka.git
 ```
-2. Выполните команды:
+2. Перейдите в директорию:
+```bash
+   cd reka
+```
+3. Выполните команды:
 ```bash
     docker compose build app && \
     docker compose up -d
 ```
-3. Приложение доступно по адресу:
+4. Приложение доступно по адресу:
 ```bash
     http://localhost/ 
 ```
