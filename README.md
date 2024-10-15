@@ -47,18 +47,18 @@
 ## Описание локальной установки
 
 1. Клонируйте репозиторий командой:
-   ```bash
+```bash
    git remote add origin https://github.com/DmitryWebsmith/reka.git
-
-    Выполните команды:
-
+```
+2. Выполните команды:
+```bash
     docker compose build app && \
     docker compose up -d
-
-    Приложение доступно по адресу:
-
+```
+3. Приложение доступно по адресу:
+```bash
     http://localhost/ 
-
+```
 ## API
 ### Команда получения токена
 
