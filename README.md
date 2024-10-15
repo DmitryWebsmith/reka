@@ -48,7 +48,7 @@
 
 1. Клонируйте репозиторий командой:
 ```bash
-   git remote add origin https://github.com/DmitryWebsmith/reka.git
+   git clone https://github.com/DmitryWebsmith/reka.git
 ```
 2. Выполните команды:
 ```bash
