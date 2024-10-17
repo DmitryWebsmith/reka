@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\DeleteTaskRequest;
-use App\Http\Requests\GetTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Services\TaskService;
@@ -13,28 +11,34 @@ use Illuminate\Support\Facades\Auth;
 class TaskController extends Controller
 {
     private TaskService $taskService;
+
     public function __construct()
     {
         $this->taskService = new TaskService(Auth::id());
     }
 
-    public function create(StoreTaskRequest $request): JsonResponse
+    public function index(): JsonResponse
     {
-        return $this->taskService->create($request);
+        return new JsonResponse(['task' => $this->taskService->index()]);
     }
 
-    public function update(UpdateTaskRequest $request): JsonResponse
+    public function show(int $id): JsonResponse
     {
-        return $this->taskService->update($request);
+        return $this->taskService->show($id);
     }
 
-    public function destroy(DeleteTaskRequest $request): JsonResponse
+    public function store(StoreTaskRequest $request): JsonResponse
     {
-        return $this->taskService->destroy($request);
+        return $this->taskService->store($request);
     }
 
-    public function get(GetTaskRequest $request): JsonResponse
+    public function update(int $id, UpdateTaskRequest $request): JsonResponse
     {
-        return $this->taskService->get($request);
+        return $this->taskService->update($id, $request);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        return $this->taskService->destroy($id);
     }
 }

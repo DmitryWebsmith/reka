@@ -22,7 +22,6 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'task_id' => ['required', 'integer'],
             'task_title' => ['required', 'string', 'max:20', 'min:3'],
             'task_text' => ['required', 'string', 'max:200'],
             'tags' => ['required', 'string', 'max:20', 'min:3'],
@@ -37,9 +36,6 @@ class UpdateTaskRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'task_id.required' => 'Id задачи обязателен.',
-            'task_id.integer' => 'Id задачи должен быть числом.',
-
             'task_title.required' => 'Заголовок задачи обязателен.',
             'task_title.string' => 'Заголовок должен быть строкой.',
             'task_title.max' => 'Заголовок не должен превышать 20 символов.',

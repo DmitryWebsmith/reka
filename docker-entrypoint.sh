@@ -5,6 +5,7 @@ set -e
 composer install
 cp .env.example .env
 chmod 777 /var/www/storage
+chmod 777 /var/www/storage/logs
 chmod 777 /var/www/storage/framework/views/
 chmod 777 /var/www/bootstrap/cache
 php artisan key:generate

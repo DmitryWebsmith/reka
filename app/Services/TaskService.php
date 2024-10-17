@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Http\Requests\DeleteTaskRequest;
-use App\Http\Requests\GetTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Tag;
-use App\Models\TagTask;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-final class TaskService {
+final class TaskService
+{
     public function __construct(private int $userId)
     {
     }
@@ -24,14 +22,31 @@ final class TaskService {
     public function index(): Collection
     {
         return Task::query()
+            ->with('tags')
             ->where([
                 'user_id' => $this->userId,
             ])
-            ->with('tags')
             ->get();
     }
 
-    public function create(StoreTaskRequest $request): JsonResponse
+    public function show(int $id): JsonResponse
+    {
+        $task = Task::query()
+            ->with('tags')
+            ->where([
+                'id' => $id,
+                'user_id' => $this->userId,
+            ])
+            ->first();
+
+        if ($task === null) {
+            return response()->json(['message' => 'Task not found.'], 404);
+        }
+
+        return new JsonResponse(['task' => $task], Response::HTTP_OK);
+    }
+
+    public function store(StoreTaskRequest $request): JsonResponse
     {
         $task = new Task();
         $task->user_id = $this->userId;
@@ -45,10 +60,10 @@ final class TaskService {
         return new JsonResponse(['task_id' => $task->id], Response::HTTP_OK);
     }
 
-    public function update(UpdateTaskRequest $request): JsonResponse
+    public function update(int $id, UpdateTaskRequest $request): JsonResponse
     {
         $task = Task::query()->where([
-            'id' => $request->post('task_id'),
+            'id' => $id,
             'user_id' => $this->userId,
         ])->first();
 
@@ -56,12 +71,12 @@ final class TaskService {
             return response()->json(['message' => 'No task found for the given ID.'], 404);
         }
 
-        $task->title = $request->post('task_title');
-        $task->text = $request->post('task_text');
+        $task->title = $request->input('task_title');
+        $task->text = $request->input('task_text');
         $task->created_at = Carbon::now();
         $task->save();
 
-        $this->updateTags($task->id, $request->post('tags'));
+        $this->updateTags($task->id, $request->input('tags'));
 
         $tasks = Task::query()
             ->with('tags')
@@ -71,12 +86,12 @@ final class TaskService {
         return new JsonResponse(['tasks' => $tasks], Response::HTTP_OK);
     }
 
-    public function destroy(DeleteTaskRequest $request): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         try {
             $deletedCount = Task::query()
                 ->where([
-                    'id' => $request->post('task_id'),
+                    'id' => $id,
                     'user_id' => $this->userId,
                 ])
                 ->delete();
@@ -91,30 +106,11 @@ final class TaskService {
         }
     }
 
-    public function get(GetTaskRequest $request): JsonResponse
-    {
-        $task = Task::query()
-            ->with('tags')
-            ->where([
-                'id' => $request->post('task_id'),
-                'user_id' => $this->userId,
-            ])
-            ->first();
-
-        if ($task === null) {
-            return response()->json(['message' => 'Task not found.'], 404);
-        }
-
-        return new JsonResponse(['task' => $task], Response::HTTP_OK);
-    }
-
     private function updateTags(int $taskId, string $tags): void
     {
-        TagTask::query()
-            ->where('task_id', $taskId)
-            ->delete();
-
         $tags = explode(",", $tags);
+        $tagIdsList = [];
+
         foreach ($tags as $tagTitle) {
             $tagTitle = trim($tagTitle);
 
@@ -128,10 +124,9 @@ final class TaskService {
                 $tag->save();
             }
 
-            $tagTask = new TagTask();
-            $tagTask->tag_id = $tag->id;
-            $tagTask->task_id = $taskId;
-            $tagTask->save();
+            $tagIdsList[] = $tag->id;
         }
+
+        Task::query()->find($taskId)->tags()->sync($tagIdsList);
     }
 }
