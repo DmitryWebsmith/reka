@@ -9,15 +9,14 @@ use Illuminate\Support\Facades\Auth;
 class DashboardController extends Controller
 {
     private TaskService $taskService;
+
     public function __construct()
     {
         $this->taskService = new TaskService(Auth::id());
     }
 
-    public function showDashboard(): View
+    public function index(): View
     {
-        $tasks = $this->taskService->index();
-
-        return view('dashboard', compact('tasks'));
+        return view('dashboard', ['tasks' => $this->taskService->index()]);
     }
 }

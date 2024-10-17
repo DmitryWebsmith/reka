@@ -3,66 +3,44 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\ShowTasksRequest;
-use App\Http\Requests\DeleteTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
-use App\Models\User;
 use App\Services\TaskService;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class TaskController extends Controller
 {
-    public function index(ShowTasksRequest $request): JsonResponse
-    {
-        $result = $this->validateToken($request->post('token'));
-        if (is_bool($result)) {
-            return response()->json(['message', 'User not found'], 404);
-        }
+    protected TaskService $taskService;
 
-        return response()->json($result->index(), 200);
+    public function __construct(Request $request)
+    {
+        $this->taskService = $request->attributes->get('taskService');
     }
 
-    public function create(StoreTaskRequest $request): JsonResponse
+    public function index(): JsonResponse
     {
-        $result = $this->validateToken($request->post('token'));
-        if (is_bool($result)) {
-            return response()->json(['message', 'User not found'], 404);
-        }
 
-        return response()->json($result->create($request), 200);
+        return new JsonResponse(['task' => $this->taskService->index()]);
     }
 
-    public function update(UpdateTaskRequest $request): JsonResponse
+    public function show(int $id): JsonResponse
     {
-        $result = $this->validateToken($request->post('token'));
-        if (is_bool($result)) {
-            return response()->json(['message', 'User not found'], 404);
-        }
-
-        return response()->json($result->update($request), 200);
+        return $this->taskService->show($id);
     }
 
-    public function destroy(DeleteTaskRequest $request): JsonResponse
+    public function store(StoreTaskRequest $request): JsonResponse
     {
-        $result = $this->validateToken($request->post('token'));
-        if (is_bool($result)) {
-            return response()->json(['message', 'User not found'], 404);
-        }
-
-        return response()->json($result->destroy($request), 200);
+        return $this->taskService->store($request);
     }
 
-    private function validateToken($token): bool|TaskService
+    public function update(int $id, UpdateTaskRequest $request): JsonResponse
     {
-        $user = User::query()
-            ->where('api_token', $token)
-            ->first();
+        return $this->taskService->update($id, $request);
+    }
 
-        if ($user === null) {
-            return false;
-        }
-
-        return new TaskService($user->id);
+    public function destroy(int $id): JsonResponse
+    {
+        return $this->taskService->destroy($id);
     }
 }

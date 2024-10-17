@@ -138,14 +138,17 @@
         }
 
         function addTaskToDatabase(taskTitle, taskText, tags) {
-            $.post('{{ route('task.create') }}', {
-                task_title: taskTitle,
-                task_text: taskText,
-                tags: tags,
-                _token: $('meta[name="csrf-token"]').attr('content')
+            $.ajax({
+                url: '/dashboard/task',
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    task_title: taskTitle,
+                    task_text: taskText,
+                    tags: tags
+                }
             })
                 .done(function(response) {
-                    console.log(response);
                     addTaskToTable(taskTitle, taskText, tags, response.task_id);
                 })
                 .fail(function(xhr, status, error) {
@@ -155,24 +158,34 @@
         }
 
         function removeTask(button, taskId) {
-            $.post('{{ route('task.destroy') }}', {
-                task_id: taskId,
-                _token: $('meta[name="csrf-token"]').attr('content')
+            $.ajax({
+                url: '/dashboard/task/'+taskId,
+                type: 'DELETE',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }
             })
                 .done(function(response) {
-                    const row = button.parentElement.parentElement;
-                    taskList.removeChild(row);
+                    const row = button.closest('tr');
+                    row.remove();
                 })
                 .fail(function(xhr, status, error) {
                     console.error(xhr);
-                    alert(xhr.responseJSON.message);
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        alert(xhr.responseJSON.message);
+                    } else {
+                        alert('Произошла ошибка при удалении задачи.');
+                    }
                 });
         }
 
         function showUpdateTaskModal(taskId) {
-            $.post('{{ route('task.get') }}', {
-                task_id: taskId,
-                _token: $('meta[name="csrf-token"]').attr('content')
+            $.ajax({
+                url: '/dashboard/task/'+taskId,
+                type: 'GET',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }
             })
                 .done(function(response) {
                     $('#taskTitle').val(response.task.title)
@@ -206,16 +219,19 @@
         }
 
         function updateTask() {
-            $.post('{{ route('task.update') }}', {
-                task_id: $('#taskId').val(),
-                task_title: $('#taskTitle').val(),
-                task_text: $('#taskText').val(),
-                tags: $('#taskTags').val(),
-                _token: $('meta[name="csrf-token"]').attr('content')
+            $.ajax({
+                url: '/dashboard/task/'+$('#taskId').val(),
+                type: 'PUT',
+                data: {
+                    task_title: $('#taskTitle').val(),
+                    task_text: $('#taskText').val(),
+                    tags: $('#taskTags').val(),
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }
             })
                 .done(function(response) {
                     $('#myModal').modal('hide');
-                    redrawTaskTable(response.tasks)
+                    redrawTaskTable()
                 })
                 .fail(function(xhr, status, error) {
                     console.error(xhr);
@@ -223,13 +239,26 @@
                 });
         }
 
-        function redrawTaskTable(tasks) {
-            console.log(tasks)
-            $('#task-list').empty();
-            for (const task of tasks) {
-                let tags = convertTagsArrayToTagsString(task.tags)
-                addTaskToTable(task.title, task.text, tags, task.id)
-            }
+        function redrawTaskTable() {
+            $.ajax({
+                url:  '/dashboard/task/',
+                type: 'GET',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                }
+            })
+                .done(function(response) {
+                    $('#task-list').empty();
+                    for (const task of response.task) {
+                        let tags = convertTagsArrayToTagsString(task.tags)
+                        addTaskToTable(task.title, task.text, tags, task.id)
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error(xhr);
+                    alert(xhr.responseJSON.message);
+                });
+
         }
 
         function logout() {

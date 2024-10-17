@@ -63,37 +63,29 @@
 ```bash
     http://localhost/ 
 ```
-## API
-### Команда получения токена
+
+## Использование API:
+
+- Получение списка задач:
 
 ```bash
-curl -X POST http://localhost/api/token \
--H "Content-Type: application/json" \
--d '{"email": "ваш_емайл", "password": "пароль"}' 
+  php artisan task:action index --email=ваш_емайл --password=ваш_password
 ```
-### Получить список задач
+- Получение конкретной задачи:
 ```bash
-curl -X POST http://localhost/api/tasks/show \
--H "Content-Type: application/json" \
--d '{"token": "ваш_токен"}'
+    php artisan task:action show --id=1 --email=ваш_емайл --password=ваш_password
 ```
-### Добавить задачу
+- Создание задачи:
 ```bash
-curl -X POST http://localhost/api/tasks/create \
--H "Content-Type: application/json" \
--d '{"token": "ваш_токен", "task_title": "title api", "task_text": "text api", "tags": "tags, api"}'
+    php artisan task:action store  --email=ваш_емайл --password=ваш_password --data='{"task_title": "New Task", "task_text": "Task description", "tags": "tag1, tag2"}'
 ```
-### Обновить задачу
+- Обновление задачи:
 ```bash
-curl -X POST http://localhost/api/tasks/update \
--H "Content-Type: application/json" \
--d '{"token": "ваш_токен", "task_id": "task_id", "task_title": "title api", "task_text": "updated text api", "tags": "tags, api"}'
+    php artisan task:action update  --email=ваш_емайл --password=ваш_password --id=1 --data='{"task_title": "Updated Task", "task_text": "Updated Task description", "tags": "tag1, tag2"}'
+```
+- Удаление задачи:
+```bash
+    php artisan task:action destroy --id=1 --email=ваш_емайл --password=ваш_password
 ```
 
-### Удалить задачу
-```bash
-curl -X POST http://localhost/api/tasks/destroy \
--H "Content-Type: application/json" \
--d '{"token": "ваш_токен", "task_id": "task_id"}'
-```
 

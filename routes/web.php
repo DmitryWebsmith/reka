@@ -9,12 +9,8 @@ Route::get('/', function () {
 })->name('landing');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'showDashboard'])->name('dashboard');
-
-    Route::post('/dashboard/task/create', [TaskController::class, 'create'])->name('task.create');
-    Route::post('/dashboard/task/destroy', [TaskController::class, 'destroy'])->name('task.destroy');
-    Route::post('/dashboard/task/get', [TaskController::class, 'get'])->name('task.get');
-    Route::post('/dashboard/task/update', [TaskController::class, 'update'])->name('task.update');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::resource('/dashboard/task', TaskController::class);
 });
 
 require __DIR__.'/auth.php';

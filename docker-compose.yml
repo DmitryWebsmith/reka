@@ -27,6 +27,8 @@ services:
             - db_data:/var/lib/mysql
         networks:
             - laravel_network
+        ports:
+            - "3306:3306"
 
     nginx:
         image: nginx:alpine
