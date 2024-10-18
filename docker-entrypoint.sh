@@ -28,32 +28,17 @@ else
   composer install --no-interaction --prefer-dist --optimize-autoloader
 fi
 
-# Копирование .env.example в .env, если .env отсутствует
-if [ ! -f .env ]; then
-  echo "Копирование .env.example в .env..."
-  cp .env.example .env
-fi
+echo "Копирование .env.example в .env..."
+cp .env.example .env
 
-# Генерация ключа приложения, если он отсутствует
-APP_KEY_EXISTS=$(php artisan key:generate --show)
-if [ -z "$APP_KEY_EXISTS" ]; then
-  echo "Генерация ключа приложения..."
-  php artisan key:generate
-else
-  echo "Ключ приложения уже установлен."
-fi
+echo "Генерация ключа приложения..."
+php artisan key:generate
 
 echo "Установка прав доступа для директорий..."
 chmod 777 /var/www/storage
 chmod 777 /var/www/storage/logs
 chmod 777 /var/www/storage/framework/views/
 chmod 777 /var/www/bootstrap/cache
-
-# Кэширование конфигураций (опционально)
-echo "Кэширование конфигураций..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
 
 # Выполнение миграций основной базы данных
 echo "Выполнение миграций основной базы данных..."
@@ -66,6 +51,9 @@ php artisan migrate --database=mysql_test --force
 # Создание символических ссылок для хранилища
 echo "Создание символических ссылок для хранилища..."
 php artisan storage:link
+
+echo "Установка Chromedriver для браузерных тестов"
+php artisan dusk:chrome-driver
 
 # Запуск основного процесса
 echo "Запуск основного процесса..."
